@@ -48,11 +48,11 @@ Each transaction row is normalized into the following structure:
 ```text
 Date: 01 Apr 2026
 Value Date: 01 Apr 2026
-Description: UPI/609182062395/ BANARSI TEA AND SNACKS
+Description: UPI/60XXXXXXXXXX/ BANARSI...
 Cheque:
 Deposit:
-Withdrawal: 20.00
-Balance: 105730.63
+Withdrawal: XX.00
+Balance: XXXX.XX
 ```
 
 ## Dependencies
