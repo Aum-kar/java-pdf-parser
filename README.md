@@ -1,16 +1,47 @@
 # PDF Bank Statement Parser
 
-A Java-based PDF bank statement parser built using PDFBox and Tabula. The project extracts transaction data from e-statements and structures it into normalized rows containing transaction date, value date, description, cheque number, deposit amount, withdrawal amount, and balance.
+A Java-based PDF bank statement parsing and transaction extraction project built using PDFBox and Tabula.
+
+This project extracts tabular transaction data from digitally generated bank e-statements, normalizes it into structured `Transaction` objects, and generates validated financial summaries including deposits, withdrawals, and closing balances.
+
+The project was developed as a standalone parser and data normalization pipeline focused on handling semi-structured financial PDF documents.
+
+---
 
 ## Features
 
-* Extracts tabular transaction data from PDF bank statements
-* Uses Apache PDFBox for PDF loading and processing
-* Uses Tabula for table extraction
-* Handles split balance columns caused by PDF formatting
-* Skips repeated table headers and summary rows
-* Preserves empty columns for consistent schema
-* Normalizes numeric values for easier parsing and storage
+- Extracts tabular transaction data from PDF bank statements
+- Uses Apache PDFBox for PDF loading and document processing
+- Uses Tabula for table extraction
+- Converts extracted rows into normalized `Transaction` domain objects
+- Handles split balance columns caused by PDF formatting inconsistencies
+- Skips repeated table headers and summary rows
+- Preserves empty columns for consistent schema handling
+- Normalizes numeric values for easier parsing and processing
+- Processes multiple PDF statements in batch mode
+- Generates statement summaries including:
+  - total deposits
+  - total withdrawals
+  - closing balance
+- Validates extracted totals against original PDF statements
+
+---
+
+## Architecture Flow
+
+```text
+PDF Statement
+    ↓
+Table Extraction (Tabula)
+    ↓
+Row Normalization
+    ↓
+Transaction Object Mapping
+    ↓
+Statement Summary Generation
+````
+
+---
 
 ## Tech Stack
 
@@ -19,21 +50,27 @@ A Java-based PDF bank statement parser built using PDFBox and Tabula. The projec
 * Apache PDFBox
 * Tabula
 
-## Project Structure
+---
+
+# Project Structure
 
 ```text
 src/
  └── main/
      └── java/
          └── org/example/
-             └── Main.java
+             ├── Main.java
+             ├── PdfParser.java
+             └── Transaction.java
 ```
 
-## Output Schema
+---
 
-Each transaction row is normalized into the following structure:
+## Transaction Schema
 
-| Column      | Description                       |
+Each transaction is normalized into the following structure:
+
+| Field       | Description                       |
 | ----------- | --------------------------------- |
 | Date        | Transaction date                  |
 | Value Date  | Settlement/value date             |
@@ -43,17 +80,19 @@ Each transaction row is normalized into the following structure:
 | Withdrawal  | Withdrawal amount                 |
 | Balance     | Account balance after transaction |
 
+---
+
 ## Example Output
 
 ```text
-Date: 01 Apr 2026
-Value Date: 01 Apr 2026
-Description: UPI/60XXXXXXXXXX/ BANARSI...
-Cheque:
-Deposit:
-Withdrawal: XX.00
-Balance: XXXX.XX
+fileName                deposit     withdrawal     balance
+
+estatement-2025_01.pdf  34767.00    37999.51       24908.55
+estatement-2025_02.pdf  31289.70    29663.87       30856.83
+estatement-2025_03.pdf  29279.00    12948.20       51514.63
 ```
+
+---
 
 ## Dependencies
 
@@ -77,43 +116,55 @@ Add the following dependencies to `pom.xml`:
 </dependencies>
 ```
 
+---
+
 ## Running the Project
 
-1. Clone the repository
+### Clone the repository
 
 ```bash
 git clone https://github.com/Aum-kar/java-pdf-parser.git
 ```
 
-2. Open the project in IntelliJ IDEA or another Java IDE
+### Open the project
 
-3. Add a PDF bank statement file
+Open the project using IntelliJ IDEA or another Java IDE.
 
-4. Update the file path in `Main.java`
+### Add PDF statements
+
+Place PDF bank statement files inside a local directory.
+
+Update the directory path in `Main.java`:
 
 ```java
-String filepath = "path/to/statement.pdf";
+File directory = new File("path/to/pdf/folder/");
 ```
 
-5. Run the application
+### Run the application
+
+Execute `Main.java`.
+
+---
 
 ## Current Limitations
 
 * Optimized for digitally generated bank statements
 * Some long descriptions may be partially truncated depending on PDF layout
-* Does not currently support scanned/image-based PDFs
-* Parsing logic may need adjustments for different bank formats
+* Does not support scanned/image-based PDFs
+* Parsing logic may require adjustments for different bank formats
+* Footer/legal disclaimer text may occasionally be extracted and filtered during parsing
 
-## Future Improvements
+---
 
-* Export parsed data to CSV/TSV
-* Database integration
-* Email attachment ingestion
-* Multi-bank format support
-* OCR support for scanned statements
-* REST API integration
-* Transaction categorization and analytics
+## Project Status
+
+This project is considered feature-complete in its current form and serves as a standalone PDF parsing and transaction extraction pipeline.
+
+Future development, database integration, and web-based workflows will be implemented separately in a new project.
+
+---
 
 ## License
 
-This project is under development and intended for educational and personal use.
+This project was developed for educational and personal use.
+

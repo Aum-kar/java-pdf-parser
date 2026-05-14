@@ -17,8 +17,7 @@ import java.util.List;
 import java.util.Locale;
 
 public class PdfParser {
-
-    static List<Transaction> processTransactions(File document) {
+    static List<Transaction> extractTransactions(File document) {
         List<Transaction> transactions = new ArrayList<>();
         try {
             PDDocument pdf = Loader.loadPDF(document);
@@ -33,34 +32,28 @@ public class PdfParser {
                     List<List<RectangularTextContainer>> rows = table.getRows();
 
                     for (List<RectangularTextContainer> row : rows) {
-                        List<String> cells = getRowData(row);
-                        if (cells != null) {
+                        List<String> cells = extractCells(row);
+                        if (cells == null) continue;
 
-                            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH);
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ENGLISH);
+                        LocalDate date, valueDate;
+                        String description, cheque;
+                        BigDecimal deposit, withdrawal, balance;
 
-                            try {
-                                LocalDate date = LocalDate.parse(cells.get(0), formatter);
-                                LocalDate valueDate = LocalDate.parse(cells.get(1), formatter);
-                                String description = cells.get(2);
-                                String cheque = cells.get(3).isEmpty() ? null : cells.get(3);
-                                BigDecimal deposit = cells.get(4).isEmpty() ? BigDecimal.ZERO : new BigDecimal(cells.get(4));
-                                BigDecimal withdrawal = cells.get(5).isEmpty() ? BigDecimal.ZERO : new BigDecimal(cells.get(5));
-                                BigDecimal balance = cells.get(6).isEmpty() ? BigDecimal.ZERO : new BigDecimal(cells.get(6));
+                        try {
+                            date = LocalDate.parse(cells.get(0), formatter);
+                            valueDate = LocalDate.parse(cells.get(1), formatter);
+                            description = cells.get(2);
+                            cheque = cells.get(3).isEmpty() ? null : cells.get(3);
+                            deposit = cells.get(4).isEmpty() ? BigDecimal.ZERO : new BigDecimal(cells.get(4));
+                            withdrawal = cells.get(5).isEmpty() ? BigDecimal.ZERO : new BigDecimal(cells.get(5));
+                            balance = cells.get(6).isEmpty() ? BigDecimal.ZERO : new BigDecimal(cells.get(6));
 
-                                Transaction transaction = new Transaction();
-                                transaction.setDate(date);
-                                transaction.setValueDate(valueDate);
-                                transaction.setDescription(description);
-                                transaction.setCheque(cheque);
-                                transaction.setDeposit(deposit);
-                                transaction.setWithdrawal(withdrawal);
-                                transaction.setBalance(balance);
-
-                                transactions.add(transaction);
-                            } catch(Exception e) {
-                                System.err.println("Failed to parse data: " + cells);
-                            }
+                            transactions.add(new Transaction(date, valueDate, description, cheque, deposit, withdrawal, balance));
+                        } catch (Exception e) {
+                            System.err.println("Failed to parse data: " + cells);
                         }
+
                     }
                 }
             }
@@ -71,7 +64,7 @@ public class PdfParser {
         return transactions;
     }
 
-    static List<String> getRowData(List<RectangularTextContainer> row) {
+    static List<String> extractCells(List<RectangularTextContainer> row) {
         List<String> cells = new ArrayList<>();
 
         /*
@@ -93,9 +86,9 @@ public class PdfParser {
          * Skip repeated page headers
          */
         boolean isHeader = (cells.contains("Value Date") || cells.contains("ValueDate"))
-                        && cells.contains("Description")
-                        && cells.contains("Withdrawal")
-                        || cells.contains("BALANCE FORWARD");
+                && cells.contains("Description")
+                && cells.contains("Withdrawal")
+                || cells.contains("BALANCE FORWARD");
 
         if (isHeader)
             return null;
@@ -134,5 +127,25 @@ public class PdfParser {
             cells.add("");
 
         return cells;
+    }
+
+    public static void printStatementSummary(File file) {
+        try {
+            List<Transaction> transactions = PdfParser.extractTransactions(file);
+
+            BigDecimal tempDeposit = BigDecimal.ZERO;
+            BigDecimal tempWithdrawal = BigDecimal.ZERO;
+            BigDecimal tempBalance = BigDecimal.ZERO;
+
+            for(Transaction transaction : transactions) {
+                tempWithdrawal = tempWithdrawal.add(transaction.getWithdrawal());
+                tempDeposit = tempDeposit.add(transaction.getDeposit());
+                tempBalance = transaction.getBalance();
+            }
+
+            System.out.println(file.getName() + ", " + tempDeposit + ", " + tempWithdrawal + ", " + tempBalance);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

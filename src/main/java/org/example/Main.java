@@ -1,18 +1,17 @@
 package org.example;
 import java.io.File;
-import java.util.List;
+
+import static org.example.PdfParser.printStatementSummary;
 
 public class Main {
     public static void main(String[] args) {
-        String filepath = "C:\\Users\\omkar\\IdeaProjects\\parse-pdf\\pdfsource\\eStatement-2024_06.pdf";
-        try {
-            File file = new File(filepath);
-            List<Transaction> transactions = PdfParser.processTransactions(file);
+        File directory = new File("C:\\Users\\omkar\\IdeaProjects\\parse-pdf\\pdfsource\\");
 
-            for(Transaction transaction : transactions)
-                System.out.println(transaction);
-        } catch (Exception e) {
-            e.printStackTrace();
+        File[] files = directory.listFiles(f -> f.getName().endsWith(".pdf"));
+        assert files != null;
+        System.out.println("fileName, deposit, withdrawal, balance");
+        for (File file : files) {
+            printStatementSummary(file);
         }
     }
 }

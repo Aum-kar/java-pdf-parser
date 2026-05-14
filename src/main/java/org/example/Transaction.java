@@ -9,9 +9,21 @@ public class Transaction {
     private LocalDate valueDate;
     private String description;
     private String cheque;
-    private BigDecimal deposit;
-    private BigDecimal withdrawal;
-    private BigDecimal balance;
+    private BigDecimal deposit = BigDecimal.ZERO;
+    private BigDecimal withdrawal = BigDecimal.ZERO;
+    private BigDecimal balance = BigDecimal.ZERO;
+
+    public Transaction() {}
+
+    public Transaction(LocalDate date, LocalDate valueDate, String description, String cheque, BigDecimal deposit, BigDecimal withdrawal, BigDecimal balance) {
+        this.date = date;
+        this.valueDate = valueDate;
+        this.description = description;
+        this.cheque = cheque;
+        this.deposit = deposit;
+        this.withdrawal = withdrawal;
+        this.balance = balance;
+    }
 
     public Long getId() {
         return id;
