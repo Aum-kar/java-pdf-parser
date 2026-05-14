@@ -1,12 +1,7 @@
 package org.example;
 
 import technology.tabula.RectangularTextContainer;
-
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class PdfParser {
@@ -36,7 +31,7 @@ public class PdfParser {
         /*
          * Skip repeated page headers
          */
-        boolean isHeader = cells.contains("Value Date") || cells.contains("ValueDate")
+        boolean isHeader = (cells.contains("Value Date") || cells.contains("ValueDate"))
                         && cells.contains("Description")
                         && cells.contains("Withdrawal")
                         || cells.contains("BALANCE FORWARD");
